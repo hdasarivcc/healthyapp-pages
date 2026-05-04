@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Healthy — Launching Soon</title>
+<meta name="description" content="AI-powered preventive health, home lab collection, and ABDM-connected records — coming soon to healthyapp.com.">
+<link rel="icon" type="image/png" href="assets/icon.png">
+<link rel="apple-touch-icon" href="assets/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Sora', sans-serif;
+  background: #0b0f0e;
+  color: #f0ede6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── TOKENS ── */
+:root {
+  --green:   #00c896;
+  --green-dim: #00a87e;
+  --gold:    #e6b84a;
+  --red:     #ff5c5c;
+  --amber:   #ffaa44;
+  --bg:      #0b0f0e;
+  --bg2:     #131918;
+  --bg3:     #1a2120;
+  --bg4:     #212e2b;
+  --border:  rgba(0,200,150,0.12);
+  --border2: rgba(0,200,150,0.22);
+  --text:    #f0ede6;
+  --text2:   rgba(240,237,230,0.6);
+  --text3:   rgba(240,237,230,0.35);
+}
+
+/* ── ANIMATED BACKGROUND ── */
+.bg-layer {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  overflow: hidden;
+}
+.glow {
+  position: absolute; border-radius: 50%;
+}
+.glow.g1 {
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(0,200,150,0.10) 0%, transparent 65%);
+  top: -180px; right: -180px;
+  animation: drift 10s ease-in-out infinite;
+}
+.glow.g2 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(230,184,74,0.07) 0%, transparent 65%);
+  bottom: -100px; left: -120px;
+  animation: drift 14s ease-in-out infinite reverse;
+}
+.glow.g3 {
+  width: 320px; height: 320px;
+  background: radial-gradient(circle, rgba(0,200,150,0.06) 0%, transparent 65%);
+  top: 55%; left: 50%; transform: translate(-50%,-50%);
+  animation: pulse-glow 6s ease-in-out infinite;
+}
+@keyframes drift {
+  0%,100% { transform: translateY(0) translateX(0); }
+  33%      { transform: translateY(-24px) translateX(12px); }
+  66%      { transform: translateY(12px) translateX(-18px); }
+}
+@keyframes pulse-glow {
+  0%,100% { opacity: 0.4; transform: translate(-50%,-50%) scale(1); }
+  50%      { opacity: 1;   transform: translate(-50%,-50%) scale(1.18); }
+}
+
+/* grid overlay */
+.grid-overlay {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(0,200,150,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,200,150,0.025) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* ── LAYOUT ── */
+.page {
+  position: relative; z-index: 1;
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 2rem 1.5rem;
+  text-align: center;
+}
+
+/* ── TOP BAR ── */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.25rem 3rem;
+  background: rgba(11,15,14,0.85);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+.logo {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.5rem; letter-spacing: -0.02em;
+  color: var(--green); text-decoration: none;
+}
+.topbar-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--text3);
+  border: 1px solid var(--border);
+  padding: 0.3rem 0.8rem; border-radius: 100px;
+}
+
+/* ── HERO CONTENT ── */
+.content { max-width: 720px; width: 100%; }
+
+.eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--green);
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  margin-bottom: 2rem;
+}
+.eyebrow-line {
+  display: inline-block; width: 28px; height: 1px; background: var(--green);
+}
+
+/* ── HEARTBEAT ICON ── */
+.heartbeat-wrap {
+  display: flex; justify-content: center; margin-bottom: 2rem;
+}
+.heartbeat-svg {
+  width: 64px; height: 40px; overflow: visible;
+}
+.heartbeat-path {
+  fill: none; stroke: var(--green); stroke-width: 2.2;
+  stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 200;
+  animation: draw-beat 2.4s ease-in-out infinite;
+}
+@keyframes draw-beat {
+  0%   { stroke-dashoffset: 200; opacity: 0; }
+  20%  { opacity: 1; }
+  60%  { stroke-dashoffset: 0; opacity: 1; }
+  90%  { stroke-dashoffset: 0; opacity: 0.2; }
+  100% { stroke-dashoffset: 200; opacity: 0; }
+}
+
+/* ── HEADING ── */
+.heading {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(3rem, 7vw, 5.5rem);
+  font-weight: 400; line-height: 1.05;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.5rem;
+  color: var(--text);
+}
+.heading em { color: var(--green); font-style: normal; display: block; }
+
+.subheading {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(1.5rem, 3.5vw, 2.4rem);
+  font-weight: 400; font-style: italic;
+  color: var(--text2);
+  margin-bottom: 1.75rem;
+}
+
+.tagline {
+  font-size: 1rem; font-weight: 300; line-height: 1.8;
+  color: var(--text2); max-width: 540px; margin: 0 auto 3rem;
+}
+.tagline strong { color: var(--text); font-weight: 600; }
+
+/* ── NOTIFY FORM ── */
+.notify-wrap {
+  display: flex; flex-direction: column; align-items: center; gap: 0.75rem;
+  margin-bottom: 3.5rem;
+}
+.notify-label {
+  font-size: 0.78rem; color: var(--text3);
+  letter-spacing: 0.06em; text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+}
+.notify-row {
+  display: flex; gap: 0; width: 100%; max-width: 440px;
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 14px; overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.notify-row:focus-within {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(0,200,150,0.12);
+}
+.notify-input {
+  flex: 1; background: transparent; border: none; outline: none;
+  padding: 0.9rem 1.2rem;
+  font-family: 'Sora', sans-serif; font-size: 0.9rem;
+  color: var(--text);
+}
+.notify-input::placeholder { color: var(--text3); }
+.notify-btn {
+  background: var(--green); color: var(--bg);
+  border: none; padding: 0.9rem 1.4rem;
+  font-family: 'Sora', sans-serif; font-size: 0.82rem; font-weight: 700;
+  cursor: pointer; white-space: nowrap;
+  transition: opacity 0.2s, background 0.2s;
+  display: flex; align-items: center; gap: 0.45rem;
+}
+.notify-btn:hover { opacity: 0.88; }
+.notify-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.notify-msg {
+  font-size: 0.8rem; height: 1.1rem;
+  transition: color 0.3s;
+}
+.notify-msg.ok  { color: var(--green); }
+.notify-msg.err { color: var(--red); }
+
+/* ── FEATURE PILLS ── */
+.features {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem;
+  margin-bottom: 4rem;
+}
+.pill {
+  display: flex; align-items: center; gap: 0.45rem;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 100px; padding: 0.45rem 1rem;
+  font-size: 0.75rem; color: var(--text2);
+  transition: border-color 0.2s, color 0.2s;
+}
+.pill:hover { border-color: var(--green); color: var(--text); }
+.pill-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green); flex-shrink: 0;
+}
+.pill-dot.gold   { background: var(--gold); }
+.pill-dot.amber  { background: var(--amber); }
+.pill-dot.red    { background: var(--red); }
+.pill-dot.purple { background: #a78bfa; }
+.pill-dot.cyan   { background: #22d3ee; }
+
+/* ── APP LOGO ── */
+.app-logo-wrap {
+  display: flex; flex-direction: column; align-items: center; gap: 0.75rem;
+  margin-bottom: 3rem;
+}
+.app-logo-img {
+  width: 72px; height: 72px; border-radius: 18px;
+  box-shadow: 0 0 0 1px var(--border), 0 12px 32px rgba(0,0,0,0.45);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.app-logo-img:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 0 1px var(--border2), 0 20px 40px rgba(0,200,150,0.15);
+}
+.app-logo-name {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.1rem; letter-spacing: -0.02em;
+  color: var(--text2);
+}
+
+/* ── SOCIAL / FOOTER ── */
+.footer-row {
+  display: flex; align-items: center; justify-content: center; gap: 1.5rem;
+  flex-wrap: wrap;
+}
+.social-link {
+  display: flex; align-items: center; gap: 0.45rem;
+  color: var(--text3); text-decoration: none; font-size: 0.78rem;
+  transition: color 0.2s;
+}
+.social-link:hover { color: var(--green); }
+.sep { color: var(--text3); font-size: 0.7rem; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  .topbar { padding: 1rem 1.5rem; }
+  .topbar-tag { display: none; }
+  .notify-row { border-radius: 12px; }
+}
+</style>
+</head>
+<body>
+
+<!-- background layers -->
+<div class="bg-layer">
+  <div class="glow g1"></div>
+  <div class="glow g2"></div>
+  <div class="glow g3"></div>
+</div>
+<div class="grid-overlay"></div>
+
+<!-- top bar -->
+<header class="topbar">
+  <span class="logo">Healthy</span>
+  <span class="topbar-tag">Private Beta</span>
+</header>
+
+<!-- main content -->
+<main class="page">
+  <div class="content">
+
+    <!-- heartbeat animation -->
+    <div class="heartbeat-wrap">
+      <svg class="heartbeat-svg" viewBox="0 0 160 40">
+        <path class="heartbeat-path"
+          d="M0,20 L30,20 L38,6 L46,34 L54,12 L62,28 L70,20 L160,20"/>
+      </svg>
+    </div>
+
+    <!-- eyebrow -->
+    <div class="eyebrow">
+      <span class="eyebrow-line"></span>
+      Something big is coming
+    </div>
+
+    <!-- heading -->
+    <h1 class="heading">
+      Your health.<br>
+      <em>Reimagined.</em>
+    </h1>
+    <p class="subheading">Launching soon.</p>
+
+    <!-- tagline -->
+    <p class="tagline">
+      <strong>Healthy</strong> brings AI-powered preventive care, home lab collection,
+      real-time triage alerts, and ABDM-connected health records — all in one place.
+      We're putting the finishing touches on something that will change how India
+      takes care of itself.
+    </p>
+
+    <!-- notify form -->
+    <div class="notify-wrap">
+      <span class="notify-label">Get notified at launch</span>
+      <div class="notify-row">
+        <input
+          class="notify-input"
+          id="notify-email"
+          type="email"
+          placeholder="your@email.com"
+          autocomplete="email"
+        />
+        <button class="notify-btn" id="notify-btn" onclick="handleNotify()">
+          Notify me &rarr;
+        </button>
+      </div>
+      <span class="notify-msg" id="notify-msg"></span>
+    </div>
+
+    <!-- feature pills -->
+    <div class="features">
+      <span class="pill"><span class="pill-dot"></span> AI Health Insights</span>
+      <span class="pill"><span class="pill-dot gold"></span> Home Lab Collection</span>
+      <span class="pill"><span class="pill-dot amber"></span> Triage Alerts</span>
+      <span class="pill"><span class="pill-dot purple"></span> ABDM Records</span>
+      <span class="pill"><span class="pill-dot cyan"></span> Preventive Screening</span>
+      <span class="pill"><span class="pill-dot red"></span> Health Credits</span>
+    </div>
+
+    <!-- app logo -->
+    <div class="app-logo-wrap">
+      <img class="app-logo-img" src="assets/icon.png" alt="Healthy app icon">
+      <span class="app-logo-name">healthyapp.com</span>
+    </div>
+
+    <!-- footer links -->
+    <div class="footer-row">
+      <a href="mailto:hello@healthyapp.com" class="social-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 7L2 7"/></svg>
+        hello@healthyapp.com
+      </a>
+      <span class="sep">·</span>
+      <a href="#" class="social-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
+        @gethealthyapp
+      </a>
+      <span class="sep">·</span>
+      <a href="#" class="social-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        LinkedIn
+      </a>
+    </div>
+
+  </div>
+</main>
+
+<script>
+/* ── NOTIFY ── */
+const API = 'https://api.healthyapp.com';
+
+async function handleNotify() {
+  const emailEl = document.getElementById('notify-email');
+  const btn     = document.getElementById('notify-btn');
+  const msg     = document.getElementById('notify-msg');
+  const email   = emailEl.value.trim().toLowerCase();
+
+  msg.textContent = '';
+  msg.className   = 'notify-msg';
+
+  if (!email || !email.includes('@') || !email.split('@')[1]?.includes('.')) {
+    msg.textContent = 'Please enter a valid email address.';
+    msg.className   = 'notify-msg err';
+    emailEl.focus();
+    return;
+  }
+
+  btn.disabled    = true;
+  btn.textContent = 'Sending…';
+
+  try {
+    const res = await fetch(`${API}/demo/request`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ name: email.split('@')[0], email, role: 'interested' }),
+    });
+
+    if (res.status === 409) {
+      msg.textContent = "You're already on the list — we'll reach out soon!";
+      msg.className   = 'notify-msg ok';
+    } else if (res.ok) {
+      emailEl.value   = '';
+      msg.textContent = "You're on the list! We'll notify you at launch.";
+      msg.className   = 'notify-msg ok';
+    } else {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.detail || 'Something went wrong');
+    }
+  } catch (err) {
+    /* fallback: show success if network not yet live */
+    if (err.message === 'Failed to fetch') {
+      emailEl.value   = '';
+      msg.textContent = "Saved! We'll notify you when we launch.";
+      msg.className   = 'notify-msg ok';
+    } else {
+      msg.textContent = err.message;
+      msg.className   = 'notify-msg err';
+    }
+  } finally {
+    btn.disabled    = false;
+    btn.innerHTML   = 'Notify me &rarr;';
+  }
+}
+
+/* allow Enter key in email field */
+document.getElementById('notify-email').addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleNotify();
+});
+</script>
+</body>
+</html>
