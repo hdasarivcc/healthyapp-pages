@@ -392,7 +392,8 @@ body {
 
 <script>
 /* ── NOTIFY ── */
-const API = 'https://api.healthyapp.in';
+// After deploying sheets-script.gs as a Web App, paste the URL below
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwtn73OJjFAj1291G-KguU4_kxC1QOKGv49KNUp_g8o7_vVE1-N_5JdwcDFy3KfF2lg/exec';
 
 async function handleNotify() {
   const emailEl = document.getElementById('notify-email');
@@ -410,40 +411,29 @@ async function handleNotify() {
     return;
   }
 
-  btn.disabled    = true;
+  btn.disabled   = true;
   btn.textContent = 'Sending…';
 
   try {
-    const res = await fetch(`${API}/demo/request`, {
+    // Google Apps Script requires no-cors — response is opaque but data is saved
+    await fetch(SCRIPT_URL, {
       method:  'POST',
+      mode:    'no-cors',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ name: email.split('@')[0], email, role: 'interested' }),
+      body:    JSON.stringify({ email, name: email.split('@')[0] }),
     });
 
-    if (res.status === 409) {
-      msg.textContent = "You're already on the list — we'll reach out soon!";
-      msg.className   = 'notify-msg ok';
-    } else if (res.ok) {
-      emailEl.value   = '';
-      msg.textContent = "You're on the list! We'll notify you at launch.";
-      msg.className   = 'notify-msg ok';
-    } else {
-      const body = await res.json().catch(() => ({}));
-      throw new Error(body.detail || 'Something went wrong');
-    }
+    emailEl.value   = '';
+    msg.textContent = "You're on the list! We'll notify you at launch.";
+    msg.className   = 'notify-msg ok';
+
   } catch (err) {
-    /* fallback: show success if network not yet live */
-    if (err.message === 'Failed to fetch') {
-      emailEl.value   = '';
-      msg.textContent = "Saved! We'll notify you when we launch.";
-      msg.className   = 'notify-msg ok';
-    } else {
-      msg.textContent = err.message;
-      msg.className   = 'notify-msg err';
-    }
+    console.error('Notify form error:', err);
+    msg.textContent = 'Something went wrong. Please try again.';
+    msg.className   = 'notify-msg err';
   } finally {
-    btn.disabled    = false;
-    btn.innerHTML   = 'Notify me &rarr;';
+    btn.disabled  = false;
+    btn.innerHTML = 'Notify me &rarr;';
   }
 }
 
